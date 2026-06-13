@@ -1,19 +1,14 @@
-import os, sys
-
-libs = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libs')
-sys.path.insert(0, libs)
-
-import json
+import json, os
 from pathlib import Path
 from datetime import datetime
 from time import sleep
 from certidoes import Bot
 
 def main():
-    cur_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'queue')
-    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),datetime.now().strftime("%Y"),datetime.now().strftime("%m"))
-    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_logBot.log')
-    #print(log_file)
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    cur_path = os.path.join(ROOT_DIR,'queue')
+    out_path = os.path.join(ROOT_DIR),datetime.now().strftime("%Y"),datetime.now().strftime("%m"))
+    log_file = os.path.join(ROOT_DIR),f'{datetime.now().strftime("%Y")}_logBot.log')
 
     if os.path.exists(cur_path):
         queue = [f.name for f in os.scandir(cur_path) if f.is_file()]
@@ -22,7 +17,7 @@ def main():
         print(f"Log ativado em: {log_file}\n")
         if queue:
             for q in queue:
-                request_name = os.path.splitext(q)[0]
+                request_name, _ = os.path.splitext(q)
                 request_folder = os.path.join(out_path, request_name)
                 request_result = os.path.join(request_folder,"resultado.json")
 
@@ -42,8 +37,8 @@ def main():
                     os.rename(os.path.join(cur_path, q), cur_request)
                     print('...')
 
-                    #bot = Bot(cnpj, request_folder)
-                    #result = bot.search()                    
+                    bot = Bot(cnpj, request_folder)
+                    result = bot.search()                    
 
                     cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -64,7 +59,7 @@ def main():
                     pass
                 pass
 def logBot(msg):
-    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_logBot.log')
+    log_file = os.path.join(ROOT_DIR),f'{datetime.now().strftime("%Y")}_logBot.log')
 
     with open(log_file, "a", encoding="utf-8") as log:
         log.write(msg)

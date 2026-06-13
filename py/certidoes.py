@@ -5,7 +5,7 @@ from time import sleep
 from datetime import datetime
 
 class Bot:
-    def __init__(self, cnpj):
+    def __init__(self, cnpj, destination_folder):
         #[...]
         #Opa, peraí !
         #Esse bot você encontra no link abaixo:
