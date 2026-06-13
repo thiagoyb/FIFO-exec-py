@@ -28,7 +28,25 @@ switch($_SERVER['REQUEST_METHOD']){
 					@mkdir($PATH_OUTPUT, 0777, true);
 				}
 
-				switch($params['a']){	
+				switch($params['a']){
+					case 'current_process':{
+						if(!empty($_RECV)){
+							if(is_dir($PATH_INPUT)){
+								$search = glob($PATH_INPUT.'*.lock');
+
+								if(!empty($search)){
+									$request = isset($search[0]) ? basename($search[0]) : array();
+									$cnpj = substr($request,0,14);
+
+									$rs = Utils::setMask($cnpj, '##.###.###/####-##');
+									$arrReturn['id'] = $rs;
+									$arrReturn['rs'] = true;
+
+								} else {	$arrReturn['msg'] = 'Nenhuma requisição em processamento !';}
+							} else {	$arrReturn['msg'] = 'Diretório de entrada não encontrado !';}							
+						} else {	$arrReturn['msg'] = 'Sem dados recebidos !';}
+						break;
+					}
 					case 'sendQueue':{
 						if(!empty($_RECV)){
 							if(Utils::isCNPJ(isset($_RECV['cnpj']) ? $_RECV['cnpj']: '')){

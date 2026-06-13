@@ -350,7 +350,15 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 			<section id="barraDireita" class="col-md-6 col-sm-8 clearfix">
 				<ul class="user-info pull-left pull-right-xs pull-none-xsm">
 					<li>
-						
+						<a href="#" class="btn text-center">
+							<font class="d-block messageSimple w-100">
+								<b id="processing_now" class="badge badge-roundless text-white badge-status" style="font-size: 11px;">
+									carregando...<script>
+									setTimeout(()=>{current_process(); },999);
+									</script>
+								</b> sendo processado...
+							</font>
+						</a>
 					</li>
 				</ul>
 			</section>
@@ -421,8 +429,38 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 		toast.textContent = msg;
 		document.body.appendChild(toast);
 		setTimeout(() => { toast.remove(); }, 5000);
-	  }
-	  const sendQueue = e =>{
+	}
+	const current_process = ()=> {
+		if(event) event.preventDefault();
+		let cur_container = document.querySelector('b#processing_now');
+		if(cur_container){
+			return fetch(`ajax.php?a=current_process&token=<?= strtotime('+6 hour'); ?>`,{
+				method: 'POST', headers: {
+				  'Accept': 'application/json'
+				},
+				body: Utils.Obj2FD({code:null})
+			})
+			.then(response => {
+				if(!response.ok){
+				   throw new Error('Error: '+response.statusText);
+				}
+				return response.json();
+			})
+			.then(rs => {
+				if(rs.id && rs.id!=''){
+					cur_container.classList.add('ongoing');
+					cur_container.classList.add('blink');
+					cur_container.innerHTML =  rs.id;
+				} else{
+					cur_container.classList.remove('ongoing');
+					cur_container.classList.remove('blink');
+					cur_container.innerHTML =  'carregando...';
+				}
+				setTimeout(()=>{ current_process(); }, 3000);
+			});
+		}
+	}
+	const sendQueue = e =>{
 		if(event) event.preventDefault();
 		let form = e.closest('form') ? e.closest('form') : document, cnpj = form.querySelector('[name=cnpj]');
 		if(Utils.isCNPJ(cnpj.value)){
