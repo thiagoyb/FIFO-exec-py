@@ -422,6 +422,35 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 		document.body.appendChild(toast);
 		setTimeout(() => { toast.remove(); }, 5000);
 	  }
+	  const sendQueue = e =>{
+		if(event) event.preventDefault();
+		let form = e.closest('form') ? e.closest('form') : document, cnpj = form.querySelector('[name=cnpj]');
+		if(Utils.isCNPJ(cnpj.value)){
+			e.innerHTML='Carregando...';
+			e.value=e.innerHTML;
+			e.disabled = true;
+			return fetch(`ajax.php?a=sendQueue&token=<?= strtotime('+6 hour'); ?>`,{
+				method: 'POST', headers: {
+				  'Accept': 'application/json'
+				},
+				body: Utils.Obj2FD({cnpj:cnpj.value})
+			})
+			.then(response => {
+				e.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Gerar Certidões';
+				e.disabled = true;	e.value=e.innerHTML;
+				if(!response.ok){
+				   throw new Error('Error: '+response.statusText);
+				}
+				return response.json();
+			})
+			.then(rs => {
+				if(rs.msg && rs.msg!='') mostrarErro(rs.msg);
+				if(rs.rs){
+					form.innerHTML = "Emitido com Sucesso!<br>CNPJ: "+cnpj+"<br>Status: Na Fila.";
+				}
+			});
+		} else{ mostrarErro('Não é CNPJ valido!'); }
+	}
 	  $(document).ready(function(){
 		$(window).scroll(function(){
 			if ($(this).scrollTop() > 100) {

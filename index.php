@@ -2,7 +2,7 @@
     session_start();
 	date_default_timezone_set('America/Sao_Paulo');
 
-	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
+	//require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Utils.php';
 
 	$servidor = array('id'=>1,'nome'=>'Thiago');//Session::authServidor(__FILE__);
