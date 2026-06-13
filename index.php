@@ -2,10 +2,10 @@
     session_start();
 	date_default_timezone_set('America/Sao_Paulo');
 
-	//require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
+	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Utils.php';
 
-	$servidor = array('id'=>1,'nome'=>'Thiago');//Session::authServidor(__FILE__);
+	$servidor = Session::authServidor(__FILE__);
 
 	$VAR_NOME_SERVIDOR = ucwords(strtolower(isset($servidor['nome']) ? $servidor['nome'] : 'Anonimo'));
 	$VAR_SERVIDOR_ID = isset($servidor['id']) ? $servidor['id'] : 0;

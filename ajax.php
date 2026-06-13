@@ -13,10 +13,10 @@ switch($_SERVER['REQUEST_METHOD']){
 
 		if(isset($params['a']) && isset($params['token']) && $params['token'] > time()){
 			$servidor = Session::authServidor(__FILE__, true);
-			$VAR_SERVIDOR_ID = isset($servidor['idServidor']) ? $servidor['idServidor'] : null;
+			$VAR_SERVIDOR_ID = isset($servidor['id']) ? $servidor['id'] : null;
 			$VAR_NOME_SERVIDOR = ucwords(strtolower(isset($servidor['nome']) ? $servidor['nome'] : 'Anonimo'));
 
-			$PATH = $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.'certidoes'.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
+			$PATH = __DIR__.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
 
 			if(!empty($servidor)){
 				$_RECV = Utils::receiveAjaxData('POST');
@@ -59,7 +59,7 @@ switch($_SERVER['REQUEST_METHOD']){
 										}
 									} else {
 										$request = isset($search[0]) ? $search[0] : array();
-										$user = Session::getServidorUser(@file_get_contents($request));
+										$user = $servidor;//Session::getServidorUser(@file_get_contents($request));
 
 										$info = pathinfo($request);
 										$ext = $info['extension'];

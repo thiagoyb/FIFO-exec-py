@@ -158,6 +158,32 @@ class Utils{
 
 		return Utils::cast($_RECV);
 	}
+
+	static function cast($str){
+		if(is_array($str)){
+			foreach($str as $key => $val){
+				$str[$key] = Utils::cast($val);
+			}
+		} else{
+			if(strtolower($str) === 'null'){
+				return null;
+			}
+			if(strtolower($str) === 'true' || strtolower($str) === 'on'){
+				return true;
+			}
+			if(strtolower($str) === 'false' || strtolower($str) === 'off'){
+				return false;
+			}
+			if(is_numeric($str) && (int)$str == $str){
+				return (int)$str;
+			}
+			if(is_numeric($str) && (float)$str == $str){
+				return (float)$str;
+			}
+		}
+
+		return $str; 
+	}
 	static function teste($a){ return 'Received: = '.$a; }
 }
 ?>

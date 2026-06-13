@@ -390,11 +390,11 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
     <script type="application/javascript" src="./assets/js/Masks.js"></script>
     <script type="application/javascript" src="./assets/js/Listener.js"></script>
 
-	<!--<script type="application/javascript" src="./assets/js/TweenMax.min.js"></script>-->
+	<script type="application/javascript" src="./assets/js/TweenMax.min.js"></script>
 	<script type="application/javascript" src="./assets/js/jquery-ui-1.10.3.minimal.min.js"></script>
 	<script type="application/javascript" src="./assets/js/bootstrap.js"></script>
-	<!--<script type="application/javascript" src="./assets/js/joinable.js"></script>
-	<script type="application/javascript" src="./assets/js/resizeable.js"></script>-->
+	<!--<script type="application/javascript" src="./assets/js/joinable.js"></script>-->
+	<script type="application/javascript" src="./assets/js/resizeable.js"></script>
 	<!-- JS initializations and stuff -->
 	<script type="application/javascript" src="./assets/js/neon-api.js"></script>
 	<script type="application/javascript" src="./assets/js/neon-custom.js"></script>
