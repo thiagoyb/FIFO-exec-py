@@ -1,4 +1,9 @@
-import os, json
+import os, sys
+
+libs = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libs')
+sys.path.insert(0, libs)
+
+import json
 from pathlib import Path
 from datetime import datetime
 from time import sleep
@@ -7,7 +12,7 @@ from certidoes import Bot
 def main():
     cur_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'queue')
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),datetime.now().strftime("%Y"),datetime.now().strftime("%m"))
-    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_log.log')
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_logBot.log')
     #print(log_file)
 
     if os.path.exists(cur_path):
@@ -23,37 +28,22 @@ def main():
 
                 os.makedirs(request_folder, exist_ok=True)             
 
-                cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 print(f"[[Recebendo a requisição:]] {q}")
                 logBot(f"\n[[Recebendo a requisição:]] {q}")
 
                 cnpj = q.split('_')[0] if '_' in q else q
-                cur_request = None
+                cur_request = os.path.join(cur_path, f"{request_name}.lock")
+
+                cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
                     logBot(f"\n[{cur_date}] Processando o CNPJ: {cnpj}...")
                     print(f"[{cur_date}] Processando o CNPJ: {cnpj}...")
 
-                    cur_request = os.path.join(cur_path, f"{request_name}.lock")
                     os.rename(os.path.join(cur_path, q), cur_request)
                     print('...')
-                    sleep(1)
-                    pass
+
                     #bot = Bot(cnpj, request_folder)
-                    #result = bot.search()
-                    result = {
-                        "simples": [
-                            "Não optante",
-                            "#FC1B1B"
-                        ],
-                        "cnd": [
-                            "Positiva com efeitos de negativa",
-                            "#00ff37"
-                        ],
-                        "fgts": [
-                            "Erro no FGTS",
-                            "#FC1B1B"
-                        ]
-                    }
+                    #result = bot.search()                    
 
                     cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -67,14 +57,14 @@ def main():
                     logBot(f"\nOps, deu erro no processamento do CNPJ: {cnpj}")
                 finally:
                     if os.path.exists(cur_request):
-                        os.remove(cur_request)
                         logBot(f"\n[[Excluindo a requisição:]] {cur_request}")
                         print(f"[[Excluindo a requisição:]] {q}")
+                        os.remove(cur_request)
                         pass
                     pass
                 pass
 def logBot(msg):
-    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_log.log')
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_logBot.log')
 
     with open(log_file, "a", encoding="utf-8") as log:
         log.write(msg)
