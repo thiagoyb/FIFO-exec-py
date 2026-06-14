@@ -13,8 +13,9 @@
 	$PROTOCOL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://');
 	$URL_HOME = $PROTOCOL.$_SERVER['HTTP_HOST'].'certidoes';
 	$PATH = $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.'certidoes'.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
+	$p = isset($_GET['p']) && $_GET['p']!='' ? $_GET['p'].'.php' : 'certidoes.php';
 //echo $URL_HOME;exit;
 
-	require 'certidoes.php';
+	require $p;
 	exit;
 ?>
