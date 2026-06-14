@@ -4,6 +4,7 @@
 
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Utils.php';
+	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Config.php';
 
 	$servidor = Session::authServidor(__FILE__);
 
@@ -11,8 +12,8 @@
 	$VAR_SERVIDOR_ID = isset($servidor['id']) ? $servidor['id'] : 0;
 
 	$PROTOCOL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://');
-	$URL_HOME = $PROTOCOL.$_SERVER['HTTP_HOST'].'certidoes';
-	$PATH = $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.'certidoes'.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
+	$URL_HOME = isset($ENV_SETTINGS['URL']) ? $PROTOCOL.$ENV_SETTINGS['URL'] : $PROTOCOL.$_SERVER['HTTP_HOST'].'certidoes';
+	$PATH = isset($ENV_SETTINGS['PATH']) ? $ENV_SETTINGS['PATH'] : __DIR__.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
 	$p = isset($_GET['p']) && $_GET['p']!='' ? $_GET['p'].'.php' : 'certidoes.php';
 //echo $URL_HOME;exit;
 

@@ -17,8 +17,8 @@ switch($_SERVER['REQUEST_METHOD']){
 			$VAR_NOME_SERVIDOR = ucwords(strtolower(isset($servidor['nome']) ? $servidor['nome'] : 'Anonimo'));
 
 			$PROTOCOL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://');
-			$URL_CERT = $PROTOCOL.$_SERVER['HTTP_HOST'].'/certidoes/';
-			$PATH = __DIR__.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
+			$URL = isset($ENV_SETTINGS['URL']) ? $PROTOCOL.$ENV_SETTINGS['URL'] : $PROTOCOL.$_SERVER['HTTP_HOST'].'certidoes';
+			$PATH = isset($ENV_SETTINGS['PATH']) ? $ENV_SETTINGS['PATH'] : __DIR__.DIRECTORY_SEPARATOR.'py'.DIRECTORY_SEPARATOR;
 
 			if(!empty($servidor)){
 				$_RECV = Utils::receiveAjaxData('POST');
@@ -114,7 +114,7 @@ switch($_SERVER['REQUEST_METHOD']){
 
 								foreach(array('simples','cnd','fgts') as $key){
 									if(file_exists($OUT_PATH_Q."{$key}.pdf")){
-										$arrReturn['files'][$key] = $URL_CERT."certidao.php?code={$pasta}&key={$key}";
+										$arrReturn['files'][$key] = $URL."certidao.php?code={$pasta}&key={$key}";
 									}
 								}
 							} else {
