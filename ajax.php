@@ -100,7 +100,37 @@ switch($_SERVER['REQUEST_METHOD']){
 						} else {	$arrReturn['msg'] = 'Sem dados recebidos !';}
 						break;
 					}
-					
+					case 'checkStatus':{
+						if(!empty($_RECV)){
+							$pasta = trim($_RECV['code']);
+							$OUT_PATH_Q = $PATH_OUTPUT.$pasta.DIRECTORY_SEPARATOR;
+
+							if(file_exists($OUT_PATH_Q.'resultado.json')){
+								$arrReturn['status'] = 'finished';
+								$arrReturn['rs'] = true;
+								$arrReturn['result'] = json_decode(@file_get_contents($OUT_PATH_Q.'resultado.json'));
+
+								foreach(array('simples','cnd','fgts') as $key){
+									if(file_exists($OUT_PATH_Q."{$key}.pdf")){
+										$arrReturn['files'][$key] = $URL_CERT."code={$pasta}&key={$key}";
+									}
+								}
+							} else {
+								$search = glob($PATH_INPUT.$pasta.'.*');
+								if(!empty($search)){
+									$request = isset($search[0]) ? $search[0] : array();
+									$arrReturn['status'] = strpos($request,'.lock')!==false ? 'processing' : 'ongoing';
+									$arrReturn['result'] = array();
+									$arrReturn['files'] = array();
+								} else{
+									$arrReturn['status'] = 'ongoing';
+									$arrReturn['result'] = array();
+									$arrReturn['files'] = array();
+								}
+							}
+						} else {	$arrReturn['msg'] = 'Sem dados recebidos !';}
+						break;
+					}
 					default:
 						$err = true;
 				}

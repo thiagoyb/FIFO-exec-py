@@ -484,12 +484,99 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 			.then(rs => {
 				if(rs.msg && rs.msg!='') mostrarErro(rs.msg);
 				if(rs.rs){
-					form.innerHTML = "Emitido com Sucesso!<br>CNPJ: "+cnpj+"<br>Status: Na Fila.";
+					renderPanel(form, rs.data);
+					checkStatus(rs.data.code);
 				}
 			});
 		} else{ mostrarErro('Não é CNPJ valido!'); }
 	}
-	  $(document).ready(function(){
+	const checkStatus = code=>{
+		let statusContainer = document.querySelector('.recibo-header .badge-status');
+		return fetch(`ajax.php?a=checkStatus&token=<?= strtotime('+6 hour'); ?>`,{
+				method: 'POST', headers: {
+				  'Accept': 'application/json'
+				},
+				body: Utils.Obj2FD({code:code})
+			})
+			.then(response => {
+				if(!response.ok){
+				   throw new Error('Error: '+response.statusText);
+				}
+				return response.json();
+			})
+			.then(rs => {console.log(rs);
+				switch(rs.status){
+					case 'ongoing':
+						statusContainer.innerHTML = 'Na Fila';
+						statusContainer.classList.add('pending');
+						statusContainer.classList.remove('ongoing');
+						statusContainer.classList.remove('success');
+						setTimeout(() => { checkStatus(code); }, 3000);
+						break;
+					case 'processing':
+						statusContainer.innerHTML = 'Processando';
+						statusContainer.classList.add('ongoing');
+						statusContainer.classList.remove('pending');
+						statusContainer.classList.remove('success');
+						setTimeout(() => { checkStatus(code); }, 3000);
+						break;
+					case 'finished':
+						statusContainer.innerHTML = 'Finalizado';
+						statusContainer.classList.add('success');
+						statusContainer.classList.remove('pending');
+						statusContainer.classList.remove('ongoing');
+						setTimeout(()=>{ setResult(rs);},500);
+						break;
+					default:
+						setTimeout(() => { checkStatus(code); }, 3000);
+						break;
+				}
+			});
+	}
+	const setResult = rs=>{
+		if(rs.result && rs.files){
+			Object.entries(rs.result).forEach(([key, result])=>{
+				let container = document.querySelector('.certidoes-progress #cert-'+key), a = document.createElement('a');
+				if(container){
+					const cert = result[0], cor = result[1], url = rs.files[key];
+
+					container.style.backgroundColor = cor;
+					container.innerHTML = `<i class="fa-solid fa-check"></i><strong>${key.toUpperCase()}:</strong>${cert}`;
+					a.setAttribute('class','btn btn-success rounded small position-absolute p-1');
+					a.innerHTML = 'Acessar';
+					a.target='_blank';
+					a.style = url!=undefined ? 'right:5px' : 'display:none !important';
+					a.href = url!=undefined ? url : '#';
+					container.append(a);
+				}
+			});
+		} else{ console.log('Error getting files'); } 
+	}
+	const renderPanel = (container, data)=>{
+		if(container && data){
+			container.innerHTML = `
+			<div class="card-recibo animate__animated animate__fadeIn">
+				<div class="recibo-header">
+					<h3><i class="bi bi-receipt"></i> Andamento da Requisição</h3>
+					<span class="badge-status highlight pending">${data.status.toUpperCase()}</span>
+				</div>
+				<div class="recibo-body">
+					<p><strong>ID da Requisição:</strong> ${data.idRequest}</p>
+					<p><strong>CNPJ:</strong> ${data.cnpj}</p>
+					<p><strong>Data/Hora:</strong> ${data.data}</p>
+					<p><strong>Solicitante:</strong> ${data.user}</p>
+				</div>
+				<hr>
+				<div class="certidoes-progress">
+					<div class="item-certidao font-weight-bold" id="cert-simples"><i class="spinner-border spinner-border-sm circLoader"></i> Simples Nacional</div>
+					<div class="item-certidao font-weight-bold" id="cert-cnd"><i class="spinner-border spinner-border-sm circLoader"></i> CND</div>
+					<div class="item-certidao font-weight-bold" id="cert-fgts"><i class="spinner-border spinner-border-sm circLoader"></i> FGTS</div>
+				</div>
+			</div>
+			`;
+		}
+	}
+	$(document).ready(function(){
 		$(window).scroll(function(){
 			if ($(this).scrollTop() > 100) {
 				$('a[href="#top"]').fadeIn();
