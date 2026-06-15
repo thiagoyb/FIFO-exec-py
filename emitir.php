@@ -41,6 +41,20 @@ label.checkbox.required:after{
 						<input type="text" class="form-control input-sm typeCnpj" id="cnpj" name="cnpj" maxlength="18" size="14" placeholder="00.000.000/0000-00" />
 					</div>
 					<div class="form-group col-lg-12 col-12 col-sm-12">
+						<UL class="d-block nav text-left"><?php
+						$k=0;
+						foreach(CERTS as $key => $val){
+							$k++;
+							$checado = $k<=2 ? ' checked disabled' : ''; ?>
+							<LI class="nav-item">
+								<label class="checkbox font-weight-bold <?=$k<=2?'required':'';?>"><?=$val;?>
+									<input type="checkbox" name="keys" value="<?=$key;?>" <?=$checado;?> /><span class="mark"></span>
+								</label>
+							</LI>
+						<?php
+						}
+						?></UL>
+					<hr>
 						<button class="btn btn-default btn-small" name="submit" onclick="sendQueue(this)" id="btn-submit"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Gerar Certidões</button>
 					</div>
 				</div>

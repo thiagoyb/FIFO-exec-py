@@ -16,9 +16,14 @@ def main():
 
         print(f"Log ativado em: {log_file}\n")
         if queue:
+            keys=[]
+            with open('keys.json', 'r', encoding='utf-8') as certidoes:
+                certs = json.load(certidoes)
+            pass
+
             for q in queue:
                 request_name, _ = os.path.splitext(q)
-                request_folder = os.path.join(out_path, request_name)
+                request_folder = os.path.join(out_path, request_name.split('.')[0])
                 request_result = os.path.join(request_folder,"resultado.json")
 
                 os.makedirs(request_folder, exist_ok=True)             
@@ -27,8 +32,13 @@ def main():
                 logBot(f"\n[[Recebendo a requisição:]] {q}")
 
                 cnpj = q.split('_')[0] if '_' in q else q
-                cur_request = os.path.join(cur_path, f"{request_name}.lock")
+                ids = list(request_name.split('.')[-1])
 
+                for k, cert in enumerate(certs):
+                    if str(k) in ids:
+                        keys.append(cert)
+
+                cur_request = os.path.join(cur_path, f"{request_name}.lock")
                 cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
                     logBot(f"\n[{cur_date}] Processando o CNPJ: {cnpj}...")
@@ -37,8 +47,8 @@ def main():
                     os.rename(os.path.join(cur_path, q), cur_request)
                     print('...')
 
-                    bot = Bot(cnpj, request_folder)
-                    result = bot.search()                    
+                    bot = Bot(cnpj, keys, request_folder)
+                    result = bot.search()
 
                     cur_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -52,14 +62,14 @@ def main():
                     logBot(f"\nOps, deu erro no processamento do CNPJ: {cnpj}")
                 finally:
                     if os.path.exists(cur_request):
-                        logBot(f"\n[[Excluindo a requisição:]] {cur_request}")
-                        print(f"[[Excluindo a requisição:]] {q}")
-                        os.remove(cur_request)
-                        pass
+                       logBot(f"\n[[Excluindo a requisição:]] {cur_request}")
+                       print(f"[[Excluindo a requisição:]] {q}")
+                       os.remove(cur_request)
+                       pass
                     pass
                 pass
 def logBot(msg):
-    log_file = os.path.join(ROOT_DIR),f'{datetime.now().strftime("%Y")}_logBot.log')
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{datetime.now().strftime("%Y")}_logBot.log')
 
     with open(log_file, "a", encoding="utf-8") as log:
         log.write(msg)

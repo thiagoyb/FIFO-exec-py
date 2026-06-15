@@ -4,6 +4,7 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 	exit;
 }
 	$page = isset($_GET['page']) && $_GET['page']!='' ? $_GET['page'].'.php' : 'emitir.php';
+	define('CERTS', json_decode(@file_get_contents($PATH.'keys.json'), true) ?? []);
 ?>
 <!DOCTYPE html>
 <HTML lang="pt-br">
@@ -462,7 +463,7 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 	}
 	const sendQueue = e =>{
 		if(event) event.preventDefault();
-		let form = e.closest('form') ? e.closest('form') : document, cnpj = form.querySelector('[name=cnpj]');
+		let form = e.closest('form') ? e.closest('form') : document, cnpj = form.querySelector('[name=cnpj]'), keys = Array.from(form.querySelectorAll('[type=checkbox]:checked'), e=>{return e.value});
 		if(Utils.isCNPJ(cnpj.value)){
 			e.innerHTML='Carregando...';
 			e.value=e.innerHTML;
@@ -553,8 +554,10 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 		} else{ console.log('Error getting files'); } 
 	}
 	const renderPanel = (container, data)=>{
+		const CERTS = <?=json_encode((CERTS), JSON_NUMERIC_CHECK);?>, keys = data.certs.toString().split('');
 		if(container && data){
-			container.innerHTML = `
+			let html='', k=0;
+			html+= `
 			<div class="card-recibo animate__animated animate__fadeIn">
 				<div class="recibo-header">
 					<h3><i class="bi bi-receipt"></i> Andamento da Requisição</h3>
@@ -567,13 +570,20 @@ if(basename($_SERVER['PHP_SELF'])=='certidoes.php'){
 					<p><strong>Solicitante:</strong> ${data.user}</p>
 				</div>
 				<hr>
-				<div class="certidoes-progress">
-					<div class="item-certidao font-weight-bold" id="cert-simples"><i class="spinner-border spinner-border-sm circLoader"></i> Simples Nacional</div>
-					<div class="item-certidao font-weight-bold" id="cert-cnd"><i class="spinner-border spinner-border-sm circLoader"></i> CND</div>
-					<div class="item-certidao font-weight-bold" id="cert-fgts"><i class="spinner-border spinner-border-sm circLoader"></i> FGTS</div>
+				<div class="certidoes-progress">`;
+				for(const [key, val] of Object.entries(CERTS)){
+				 if(k>0 && keys.includes(k.toString())){
+					html+= `
+						<div class="item-certidao font-weight-bold" id="cert-${key}"><i class="spinner-border spinner-border-sm circLoader"></i> ${val}</div>
+					`;
+				  } else console.log('else: ', key, val, k)
+				  k++;
+				}
+			html+= `
 				</div>
 			</div>
 			`;
+			container.innerHTML=html;
 		}
 	}
 	$(document).ready(function(){

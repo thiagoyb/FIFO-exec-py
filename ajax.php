@@ -4,6 +4,7 @@
 
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Session.php';
 	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Utils.php';
+	require dirname(__FILE__).DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'Config.php';
 
 switch($_SERVER['REQUEST_METHOD']){
 	case 'POST':{
@@ -30,6 +31,9 @@ switch($_SERVER['REQUEST_METHOD']){
 					@mkdir($PATH_OUTPUT, 0777, true);
 				}
 
+				define('CONSTKEY', '72256');
+				define('CERTS', array_keys(json_decode(@file_get_contents($PATH.'keys.json'), true) ?? []));
+
 				switch($params['a']){
 					case 'current_process':{
 						if(!empty($_RECV)){
@@ -54,6 +58,9 @@ switch($_SERVER['REQUEST_METHOD']){
 							if(Utils::isCNPJ(isset($_RECV['cnpj']) ? $_RECV['cnpj']: '')){
 								$cnpj = Utils::soNumeros($_RECV['cnpj']);
 
+								$keys = isset($_RECV['keys']) ? (strpos($_RECV['keys'],',')!==false ? explode(',',$_RECV['keys']) : array($_RECV['keys'])): array();
+								$certs = implode('',array_keys(array_intersect(CERTS, $keys)));
+
 								$data = time();
 								$request = $cnpj.'_'.$data.'.queue';
 
@@ -65,11 +72,12 @@ switch($_SERVER['REQUEST_METHOD']){
 										if($rs){
 											$metaDados=array();
 											$metaDados['cnpj'] = Utils::setMask($cnpj, '##.###.###/####-##');
-											$metaDados['idRequest'] = crc32($data);
+											$metaDados['idRequest'] = CONSTKEY.crc32($data);
 											$metaDados['data'] = date('d/m/Y H:i', $data);
 											$metaDados['code'] = $cnpj.'_'.$data;
 											$metaDados['status'] = 'ongoing';
 											$metaDados['user'] = $VAR_NOME_SERVIDOR;
+											$metaDados['certs'] = $certs;
 
 											$arrReturn['data'] = $metaDados;
 											$arrReturn['rs'] = true;
@@ -79,19 +87,23 @@ switch($_SERVER['REQUEST_METHOD']){
 										}
 									} else {
 										$request = isset($search[0]) ? $search[0] : array();
-										$user = $servidor;//Session::getServidorUser(@file_get_contents($request));
+										$user = Session::getServidorUser(@file_get_contents($request));
 
 										$info = pathinfo($request);
 										$ext = $info['extension'];
-										$data = explode('_',$info['filename'])[1];
+										$data_certs = explode('_',$info['filename'])[1];
+
+										$data = strpos($data_certs,'.')!==false ? Utils::soNumeros(explode('.',$data_certs)[0]) : '';
+										$certs = strpos($data_certs,'.')!==false ? trim(explode('.',$data_certs)[1]) : '';
 
 										$metaDados=array();
 										$metaDados['cnpj'] = Utils::setMask($cnpj, '##.###.###/####-##');
-										$metaDados['idRequest'] = crc32($data);
+										$metaDados['idRequest'] = CONSTKEY.crc32($data);
 										$metaDados['data'] = $data!='' ? date('d/m/Y H:i', $data) : '';
 										$metaDados['code'] = $cnpj.'_'.$data;
 										$metaDados['status'] = $ext == 'lock' ? 'processing' : 'ongoing';
 										$metaDados['user'] = isset($user['nome'])&&$user['nome']!='' ? $user['nome'] : 'Usuário';
+										$metaDados['certs'] = $certs;
 
 										$arrReturn['data'] = $metaDados;
 										$arrReturn['rs'] = true;
@@ -107,27 +119,28 @@ switch($_SERVER['REQUEST_METHOD']){
 							$pasta = trim($_RECV['code']);
 							$OUT_PATH_Q = $PATH_OUTPUT.$pasta.DIRECTORY_SEPARATOR;
 
+							$arrReturn['files'] = array();
+							$arrReturn['result'] = array();
+
+							$listaPDFs = glob($OUT_PATH_Q.'*.pdf') ?: [];
+							foreach($listaPDFs as $pdf){
+								$key = pathinfo($pdf, PATHINFO_FILENAME);
+								$arrReturn['files'][$key] = $URL."certidao.php?code={$pasta}&key={$key}";
+							}
+
 							if(file_exists($OUT_PATH_Q.'resultado.json')){
 								$arrReturn['status'] = 'finished';
 								$arrReturn['rs'] = true;
 								$arrReturn['result'] = json_decode(@file_get_contents($OUT_PATH_Q.'resultado.json'));
 
-								foreach(array('simples','cnd','fgts') as $key){
-									if(file_exists($OUT_PATH_Q."{$key}.pdf")){
-										$arrReturn['files'][$key] = $URL."certidao.php?code={$pasta}&key={$key}";
-									}
-								}
 							} else {
 								$search = glob($PATH_INPUT.$pasta.'.*');
 								if(!empty($search)){
 									$request = isset($search[0]) ? $search[0] : array();
 									$arrReturn['status'] = strpos($request,'.lock')!==false ? 'processing' : 'ongoing';
-									$arrReturn['result'] = array();
-									$arrReturn['files'] = array();
+
 								} else{
 									$arrReturn['status'] = 'ongoing';
-									$arrReturn['result'] = array();
-									$arrReturn['files'] = array();
 								}
 							}
 						} else {	$arrReturn['msg'] = 'Sem dados recebidos !';}
